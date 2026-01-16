@@ -1,3 +1,4 @@
+import os
 import json
 from typing import Any, Dict, List
 
@@ -114,8 +115,18 @@ class Agent:
 
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+                    # 支援自定義 API Base 與 API Key (例如 NVIDIA NIM)
+                    api_base = os.getenv("LLM_API_BASE")
+                    # 優先讀取 LLM_API_KEY，若無則嘗試讀取 NVIDIA_API_KEY (針對本次需求優化)
+                    api_key = os.getenv("LLM_API_KEY") or os.getenv("NVIDIA_API_KEY")
+
                     response_obj = completion(
-                        model=self.model_name, messages=messages, tools=tool_schemas, tool_choice="auto"
+                        model=self.model_name,
+                        messages=messages,
+                        tools=tool_schemas,
+                        tool_choice="auto",
+                        api_base=api_base,
+                        api_key=api_key,
                     )
 
                 message = response_obj.choices[0].message
